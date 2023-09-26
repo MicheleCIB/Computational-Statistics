@@ -19,3 +19,25 @@ Please write a detailed report to your boss about this investment. You need to b
 
 
 TASK 2 
+Computational Statistics
+PROJECT 2
+A researcher wants to work with a distribution with density function given by
+f(x; θ) = θ
+2
+θ + 1
+(1 + x) exp(−θx), x, θ > 0
+You can find in file project2.txt 150 observation that he believes that come from this
+distribution
+1. Estimate parameter θ using Maximum Likelihood method. You shall describe all
+steps in full detail and write your own code for this.
+2. Estimate the standard error using parametric bootstrap. This implies that you need
+to find a way to simulate from this distribution.
+3. An alternative model for the data could be one with pdf
+f(x) = π
+θ
+2
+θ + 1
+(1 + x) exp(−θx) + (1 − π)λ exp(−xλ), x, λ, θ > 0
+Estimate parameters π, θ, λ using ML method and in particular an EM algorithm.
+Give all the steps of the algorithm in full detail. Then implement this algorithm in
+R
