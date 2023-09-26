@@ -1,0 +1,215 @@
+## PROJECT 2 COMPUTATIONAL STATISTICS
+## PART 1 
+x <- c(0.347415, 0.009734134, 0.6519401, 0.6907982, 0.2685812,
+       0.05946014, 0.4826131, 0.04653082, 1.037525, 1.940423,
+       1.694221, 0.6261961, 0.3872335, 1.269577, 0.2188402,
+       0.1640713, 1.669529, 0.7466973, 0.4148929, 1.128946,
+       0.3065104, 1.331851, 0.0385756, 1.412191, 0.5607663,
+       0.8793119, 0.3156273, 0.7294317, 1.691307, 0.5794913,
+       0.3555868, 0.1664309, 0.5546347, 0.4310295, 0.2358412,
+       0.07645731, 1.260688, 2.288851, 0.4690245, 0.3128133,
+       0.3002432, 0.4548402, 0.5183904, 0.01139427, 0.007753412,
+       1.327735, 1.232343, 1.583483, 0.1036136, 2.195538,
+       0.259507, 0.05652935, 0.4726917, 0.6727291, 1.650954,
+       3.369027, 1.326091, 1.951293, 0.09741227, 0.6677686,
+       0.106373, 2.374173, 0.1154074, 0.6515606, 0.1141786,
+       0.8071788, 0.124342, 0.7276599, 0.2263286, 0.2370482,
+       0.3771782, 0.01359145, 0.03518622, 0.7115595, 0.4525161,
+       0.4285935, 1.192748, 0.8892147, 1.004442, 1.00446,
+       0.15662, 0.5098295, 0.2061306, 0.5778899, 1.473791,
+       0.4877807, 0.8067041, 0.05018838, 0.745082, 0.7606503,
+       1.517575, 0.1451806, 0.2151848, 0.1117509, 0.6583587,
+       0.5234549, 0.1045604, 0.1631891, 0.310465, 0.04730209,
+       0.09636269, 0.1680841, 0.5418559, 0.08869989, 0.5801046,
+       0.4351777, 0.45445, 0.195217, 0.6377612, 0.1990561,
+       0.7892434, 3.114564, 1.88593, 0.7243822, 4.359707,
+       0.8594134, 1.12415, 1.911639, 1.54554, 4.392843,
+       0.3164875, 1.237783, 0.7724899, 0.1733113, 2.017766,
+       0.6263609, 0.8939004, 0.6623868, 0.3702057, 0.3046611,
+       1.665406, 0.5203699, 0.2991525, 0.9329069, 2.514067,
+       0.4857354, 0.3966967, 0.1145044, 0.4779575, 1.959034,
+       0.1437268, 0.3417718, 1.32824, 0.1812514, 3.108953,
+       1.185209, 1.537728, 0.8967552, 0.4730371, 0.1541517)
+
+#Construction of the algorithm to find theta ML
+#Put about 1000 values for theta all greater than 0 and in the interval [0,2]
+#Based on calculation, we wrote the log-likehood as follows
+#After that we tried to put all the possible values of theta into the function to found the value of theta which maximizes the log-likelihood
+
+n <- length(x)
+theta<-seq(0.001,2,length=1000)
+loglik <- function(x,theta){
+  n*log((theta^2)/(theta+1))+sum(1+x[1:150])-theta*sum(x)
+}
+ft<-rep(0,1000)
+for ( i in 1:1000) {
+  ft[i]<- loglik(x,theta[i])
+}
+max(ft)
+order(ft)[1000]
+theta[871]
+
+##To be sure, I tried to put theta equal to 1 and to write an algorithm for which given the log likelihood and the function of theta ML, as calculated above, would give us the maximum likelihood estimator and the maximum value of likelihood
+
+theta<-1
+oldloglik<- loglik(x,theta)
+vrethike<- FALSE
+
+while (vrethike==FALSE) {
+  
+  theta<-  (2.554278/theta)+ 0.2771392
+  newloglik<- loglik(x,theta)
+  
+  if (abs((newloglik-oldloglik)/oldloglik) < 10^-12) vrethike<-TRUE
+  print(c(theta,newloglik))
+  oldloglik<-newloglik
+}
+
+## PART 2
+## Implementation of the algorithm to find the standard errors, based on bootstrap
+## Given the pdf, we calculated the cdf as the integral of pdf from 0 to x, because it stops until x and the values are > 0
+
+pdf<-function(x,theta) {
+  theta^2/(theta+1)*(1+x)*exp(-theta*x)
+}
+Fx<-function(x,theta) {
+  1-exp(-x*theta)*(1+theta+theta*x)/(1+theta)
+}
+
+##Then we try to implement the inversion method, to obtain a way to simulate from the distribution 
+
+tosolve<-function(x,theta,u) 1-exp(-x*theta)*(1+theta+theta*x)/(1+theta)-u
+u<-runif(1)
+uniroot(tosolve,c(0,40),theta=0.8,u=u)
+
+
+rden<-function(u,theta) {
+  uniroot(tosolve,c(0,40),theta=0.8,u=u)$root
+}
+
+u<-runif(150)
+x1<- sapply(u,rden)
+
+##Now we start bootstrap and we calculate standard errors
+
+mydata <- data.frame(x,x1)
+head(mydata)
+
+thetahat<- cor(mydata$x,mydata$x1)
+
+n<-dim(mydata)[1]
+B<-5000
+res<-ksis<-ksinew<-NULL
+
+for (i in 1:B) {
+  ind<- sample(1:n,n,replace=T)
+  boot<-mydata[ind,]
+  t1<-  cor(boot$x,boot$x1) #
+  res<-c(res,t1)
+  ksinew<- c(ksinew,(t1 -thetahat)/ ((1-t1^2)/sqrt(n-3)))
+  
+  tn<-NULL
+  for (j in 1:100) {
+    ind<- sample(1:n,n,replace=T)
+    bootnew<-boot[ind,]
+    tn<- c(tn,cor(bootnew$x,bootnew$x1))  
+  }
+  ksi<- (t1 -thetahat)/sd(tn)
+  ksis<-c(ksis,ksi)
+}
+
+##To make it better, we calculate the confidence intervals
+## We have 4 different types, we'll find the best one
+
+##A. simple
+simple<- c(thetahat - 1.96*sd(res),
+           thetahat + 1.96*sd(res))
+simple
+##B. percentile
+perc<- quantile(res, prob=c(0.025,0.975))
+perc
+
+##C. percentile t
+perct<-thetahat + quantile(ksis,prob=c(0.025,0.975))*sd(res)
+perct
+
+##D. Bias Corrected
+b0<-qnorm(mean(res<=thetahat))
+p1<- pnorm(qnorm(0.025)+2*b0)
+p2<- pnorm(qnorm(0.975)+2*b0)
+percnew<- quantile(res,prob=c(p1,p2))
+percnew
+
+##We implement the plot to see which fits best (the one that as shorter difference)
+
+hist(res)
+abline(v=thetahat, col=2)
+abline(v=simple, lwd=2, col=3)
+abline(v=perc, lwd=2, col=4)
+abline(v=perct, lwd=2, col=5)
+abline(v=percnew, lwd=2, col=6)
+
+##Based by the plot the simple one is the best, because it stays better in the center, also is interesting the percnew which is a little bit traslated on the right
+
+
+
+
+##PART 3
+##Calculate again the cdf from the pdf, that is now given and changed
+p <- 0.5
+cumulative<-function(x,theta) {
+  1-(p*exp(-x*theta)*(1+theta+theta*x)/(1+theta)) + (p-1)*exp(-lambda*x)
+}
+
+##Another time inversion method to obtain our new x=X2
+tosolve<-function(x,theta,lambda,u) 1-(p*exp(-x*theta)*(1+theta+theta*x)/(1+theta)) + (p-1)*exp(-lambda*x)-u
+u<-runif(1)
+uniroot(tosolve,c(0,40),theta=0.8,lambda=0.5,u=u)
+
+rden<-function(u,theta,lambda) {
+  uniroot(tosolve,c(0,40),theta=0.8,lambda=0.5,u=u)$root
+}
+
+u<-runif(150)
+x2<- sapply(u,rden)
+
+##Building the two models
+##The new f(x) could be written as sum of the probabilities multiplied by the proper function of each variable
+y1<- x
+y2<- rexp(150,rate = 1/0.5)
+ber<-rbinom(150,1,0.5)
+y<- ber*y1+(1-ber)*y2
+n<-length(y)
+p <- 0.5
+
+x3 <- theta^2/(theta+1)*(1+y)*exp(-theta*y)
+
+stop<- FALSE
+while (stop==FALSE) {
+  temp <- (p*(x3)+(1-p)*dexp(y,rate = 1/0.5))
+  loglik<- sum(log(temp))
+  w1<-  p*(x3)/temp
+  w2<- 1-w1
+  
+  mod1<- lm(y~x2, weights=w1)
+  mod2<- lm(y~x2, weights=w2)
+  theta.new<- mod1$coef[1]
+  lambda.new<- mod2$coef[1]
+  
+  
+  ##Update p, given the new lambda and theta
+  y1 <- theta.new^2/(theta.new+1)*(1+y)*exp(-theta.new*y)
+  y2 <- rexp(150,1/lambda.new)  
+  p.new<- sum(w1)/n
+  new<- p.new*y1+(1-p.new)*dexp(y2)
+  
+  if ((abs((sum(log(new))-loglik)/loglik)) < 10^-10) stop<-TRUE
+  
+}
+
+##Results obtained
+cbind(p.new,theta.new,lambda.new)
+
+##Possible to see the function and the related plot, that expecially in the right part tends to an exponential, as expected because p < 0.5
+sd <- p.new*(theta.new^2/(theta.new+1)*(1+x2)*exp(-theta.new*x2))+ (1-p.new)*lambda.new*exp(-x2*lambda.new)
+qqplot(sd,x2)
