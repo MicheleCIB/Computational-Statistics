@@ -1,0 +1,419 @@
+# POINT 1
+
+set.seed(123)
+
+#probability to die from year x to year x+1, between 30 and 49 
+probability.to.die <- c(0.001008,0.001046,0.001097,0.001162,0.001244,
+                 0.001336,0.001441,0.001567,0.001714,0.001874,
+                 0.002038,0.002207,0.002389,0.002593,0.002819,
+                 0.003064,0.003322,0.003589,0.003863,0.004148,
+                 0.004458,0.004800,0.005156,0.005554)
+
+# Our initial population, equally distributed between the ages
+for (i in seq(1000)) {
+  population<-seq(0.01,100.00, by= 0.01)
+  sim <- sample(population, 100, replace = FALSE)
+}
+  mn <- mean(sim)
+  y <- 0.75*mn
+  results<-rbind(mn,y)
+
+sim
+y
+results
+
+length(sim)
+#1k simulations
+results<-NULL # Matrix that will contain our results, now we called it as empty
+for (i in seq(1000)){ # with this loop we simulate the extraction of the people, 10k times
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  # Extraction of the people (sample), maximum 20 different ages, with mean 0.5 (can be dead or alive)
+  tot <- 0 # Start of the counting
+  alive <- rep(1,length(sim)) # all alive at time 0 
+  lastyearalive <- rep(4,length(sim)) # Last year in which everyone is still alive, 5 or less years
+  for (k in seq(length(sim))) {
+      for (j in 0:4) {
+          tot <- tot+1 # Every year that we survive we add 1 euro more for each person
+          alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+          # It generates only 0 and 1, 0 is for dead 1 is for alive
+            # multiply for the value of alive year x year
+          if (alive[k]==0) {
+              lastyearalive[k] <- j # If it comes with 0, we put the break in order to stop counting for dead people
+              break
+        }
+      }
+    }
+    money<-rep(0,length(sim)) # everyone earned money
+    for (k in seq(length(sim))) {
+        money[k] <- -1*(1+lastyearalive[k])
+        # we put together the final results, we sum up all the alive x years + all the deads during this years divide by the number pf alive 
+        if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+    }
+    results <- rbind(results,cbind(sim,money*100)) # Now we update the initial matrix with all the results that we need
+}
+
+mean.earn1 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn1) <- c("Age","Exp.return")
+# mean of the earned money for each age 
+mean.earn1
+plot(mean.earn1,main='Mean of exp.return x age after 1k simulations', type='o',lty=3, col='pink',lwd=4)
+summary(mean.earn1)
+
+#10k simulations
+results<-NULL 
+for (i in seq(10000)){
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim)) 
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])
+    
+    if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+  }
+  results <- rbind(results,cbind(sim,money*100)) # Now we update the initial matrix with all the results that we need
+}
+mean.earn2 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn2) <- c("Age","Exp.return")
+mean.earn2
+plot(mean.earn2,main='Mean of exp.return x age after 10k simulations', type='o',lty=3, col='blue',lwd=4)
+summary(mean.earn2)
+
+#100k simulations
+results<-NULL 
+for (i in seq(100000)){
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim)) 
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])
+    
+    if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+  }
+  results <- rbind(results,cbind(sim,money*100)) # Now we update the initial matrix with all the results that we need
+}
+mean.earn3 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn3) <- c("Age","Exp.return")
+mean.earn3
+plot(mean.earn3,main='Mean of exp.return x age after 100k simulations', type='o',lty=3, col='black',lwd=4)
+summary(mean.earn3)
+
+#POINT 2 
+
+set.seed(133)
+
+#1
+probability.to.die <- c(0.001008,0.001046,0.001097,0.001162,0.001244,
+                        0.001336,0.001441,0.001567,0.001714,0.001874,
+                        0.002038,0.002207,0.002389,0.002593,0.002819,
+                        0.003064,0.003322,0.003589,0.003863,0.004148,
+                        0.004458,0.004800,0.005156,0.005554)
+n<-floor(runif(1, min=1, max=5000))
+population<-rep(seq(30,49),n)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])
+    
+    if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn4 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn4) <- c("Age","Exp.return")
+mean.earn4
+summary(mean.earn4)
+
+#2
+probability.to.die <- c(0.001008,0.001046,0.001097,0.001162,0.001244,
+                        0.001336,0.001441,0.001567,0.001714,0.001874,
+                        0.002038,0.002207,0.002389,0.002593,0.002819,
+                        0.003064,0.003322,0.003589,0.003863,0.004148,
+                        0.004458,0.004800,0.005156,0.005554)
+n<-floor(runif(1, min=1, max=5000))
+population<-rep(seq(30,49),n)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])
+    
+    if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn5 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn5) <- c("Age","Exp.return")
+mean.earn5
+summary(mean.earn5)
+
+#3
+probability.to.die <- c(0.001008,0.001046,0.001097,0.001162,0.001244,
+                        0.001336,0.001441,0.001567,0.001714,0.001874,
+                        0.002038,0.002207,0.002389,0.002593,0.002819,
+                        0.003064,0.003322,0.003589,0.003863,0.004148,
+                        0.004458,0.004800,0.005156,0.005554)
+n<-floor(runif(1, min=1, max=5000))
+population<-rep(seq(30,49),n)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])
+    
+    if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn6 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn6) <- c("Age","Exp.return")
+mean.earn6
+summary(mean.earn6)
+
+#4
+probability.to.die <- c(0.001008,0.001046,0.001097,0.001162,0.001244,
+                        0.001336,0.001441,0.001567,0.001714,0.001874,
+                        0.002038,0.002207,0.002389,0.002593,0.002819,
+                        0.003064,0.003322,0.003589,0.003863,0.004148,
+                        0.004458,0.004800,0.005156,0.005554)
+n<-floor(runif(1, min=1, max=5000))
+population<-rep(seq(30,49),n)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])
+    
+    if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn7 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn7) <- c("Age","Exp.return")
+mean.earn7
+summary(mean.earn7)
+
+#5
+probability.to.die <- c(0.001008,0.001046,0.001097,0.001162,0.001244,
+                        0.001336,0.001441,0.001567,0.001714,0.001874,
+                        0.002038,0.002207,0.002389,0.002593,0.002819,
+                        0.003064,0.003322,0.003589,0.003863,0.004148,
+                        0.004458,0.004800,0.005156,0.005554)
+n<-floor(runif(1, min=1, max=5000))
+population<-rep(seq(30,49),n)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])
+    
+    if (alive[k]==1) money[k] <- money[k]+tot/sum(alive)
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn8 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn8) <- c("Age","Exp.return")
+mean.earn8
+summary(mean.earn8)
+
+
+#POINT 3
+
+set.seed(155)
+r<-rexp(5,1/0.02)
+
+#population 5000
+probability.to.die <- c(0.001008,0.001046,0.001097,0.001162,0.001244,
+                        0.001336,0.001441,0.001567,0.001714,0.001874,
+                        0.002038,0.002207,0.002389,0.002593,0.002819,
+                        0.003064,0.003322,0.003589,0.003863,0.004148,
+                        0.004458,0.004800,0.005156,0.005554)
+population<-rep(seq(30,49),5000)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])*r
+    
+    if (alive[k]==1) money[k] <- (money[k]+(tot/sum(alive)))
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn9 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn9) <- c("Age","Exp.return")
+mean.earn9
+summary(mean.earn9)
+
+#population 2500
+population<-rep(seq(30,49),2500)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])*r
+    
+    if (alive[k]==1) money[k] <- (money[k]+(tot/sum(alive)))
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn10 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn10) <- c("Age","Exp.return")
+mean.earn10
+summary(mean.earn10)
+
+#population 1000
+population<-rep(seq(30,49),1000)
+results<-NULL
+for (i in seq(10000)){ 
+  sim <- sample(population, 2+rbinom(1,20,0.5))
+  tot <- 0 
+  alive <- rep(1,length(sim))  
+  lastyearalive <- rep(4,length(sim)) 
+  for (k in seq(length(sim))) {
+    for (j in 0:4) {
+      tot <- tot+1 
+      alive[k] <- alive[k]*sample(c(0,1),1,prob=c(probability.to.die[sim[k]+j-29],1-probability.to.die[sim[k]+j-29]))
+      if (alive[k]==0) {
+        lastyearalive[k] <- j 
+        break
+      }
+    }
+  }
+  money<-rep(0,length(sim))
+  for (k in seq(length(sim))) {
+    money[k] <- -1*(1+lastyearalive[k])*r
+    
+    if (alive[k]==1) money[k] <- (money[k]+(tot/sum(alive)))
+  }
+  results <- rbind(results,cbind(sim,money*100))
+}
+mean.earn11 <- aggregate(results[,2],list(results[,1]),mean)
+colnames(mean.earn11) <- c("Age","Exp.return")
+mean.earn11
+summary(mean.earn11)
+
+plot(mean.earn9,main='Mean of exp.return x age with exponential investiment rates', type='o' ,lty=3, col='red',lwd=4)
+lines(mean.earn10, type='o',lty=3, col='orange',lwd=4)
+lines(mean.earn11, type='o',lty=3, col='green',lwd=4)
